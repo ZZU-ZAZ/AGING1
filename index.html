@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生物学年龄动态评估</title>
+<script>
+		let data = [];  // ✅ 先定义为全局变量
+		
+		async function loadData() {
+		    try {
+		        const response = await fetch('./output.json');
+		        data = await response.json(); // ✅ 赋值给全局变量
+		
+		        const form = document.getElementById("dataForm");
+		        form.addEventListener("submit", function(event) {
+		            handleSubmit(event); // 不用再传 data，因为现在是全局的
+		        });
+		
+		    } catch (error) {
+		        console.error('读取 JSON 时出错:', error);
+		    }
+		}
+		
+		loadData();
+		
+        function handleSubmit(event) {
+            event.preventDefault();
+        
+            // 获取所有输入字段
+            const inputs = document.querySelectorAll('#dataForm input[type="number"]');
+            let filledCount = 0;
+            let userInput = {}; // 存储用户输入的值
+            let userAge = 0;    // 存储实际年龄
+        
+            // 字母编号（前 12 个文本框用 A-L，实际年龄用 M）
+            const labels = "ABCDEFGHIJKL";
+        
+            // 遍历前 12 个文本框
+            for (let i = 0; i < 12; i++) {
+                let value = parseFloat(inputs[i].value) || 0;  // 为空时默认为 0
+                userInput[labels[i]] = value;  // 存入对象
+                if (value !== 0) {
+                    filledCount++;
+                }
+            }
+        
+            // 处理 "实际年龄" (编号 M)
+            userAge = parseFloat(inputs[12].value) || 0;
+        
+            // 如果填写数量少于 2，提示用户
+            if (filledCount < 2) {
+                alert('请至少填写两条信息！');
+                return false;
+            }
+        
+            // 调用 calculateSum 函数进行计算
+            const result = calculateSum(userInput, userAge);
+        
+            if (result) {
+                // 更新页面显示
+                let bioAge = result.finalResult.toFixed(2);  // 保留两位小数
+                let agingRate = (result.finalResult - userAge).toFixed(2);
+        
+                document.getElementById("bioAge").innerText = bioAge;
+                document.getElementById("agingRate").innerText = `${bioAge} - ${userAge} = ${agingRate}`;
+                
+                // 隐藏表单
+                document.getElementById('dataForm').style.display = 'none';
+        
+                // 显示成功提示
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.add('show');
+            } else {
+                alert('未找到匹配的计算规则！');
+                return false;
+            }
+        
+            return false;
+        }
+
+        function calculateSum(userInput, userAge) {
+            // 获取所有用户输入的字段（非空值）
+            let filledFields = Object.keys(userInput)
+                .filter(key => userInput[key] !== 0) // 过滤掉值为 0 的字段
+                .sort()
+                .join("");
+        
+            // 查找完全匹配的 comb 记录
+            let record = data.find(item => item.comb === filledFields);
+        
+            if (!record) {
+                console.log("未找到匹配的 comb 记录");
+                return null;
+            }
+        
+            let totalSum = 0;
+            let k_s_squared_sum = 0;  // 用于计算 (k/s)^2 的累加
+            let ba2 = record.ba2;  // 取 ba2 值
+        
+            // 遍历所有指标
+            for (let key of Object.keys(userInput)) {
+                let entry = data.find(item => item.comb === filledFields && item.bm === key);
+                if (entry) {
+                    let userValue = userInput[key] || 0;
+                    let calculation = ((userValue - entry.q) * entry.k) / (entry.s * entry.s);
+                    let k_s_squared = (entry.k / entry.s) * (entry.k / entry.s); // 计算 (k/s)^2
+        
+                    console.log(`指标: ${key}, 用户输入: ${userValue}, 计算值: ${calculation}, (k/s)^2: ${k_s_squared}`);
+        
+                    totalSum += calculation;
+                    k_s_squared_sum += k_s_squared;
+                }
+            }
+        
+            // 计算最终的公式结果
+            let finalResult = (totalSum + (userAge / ba2)) / (k_s_squared_sum + (1 / ba2));
+        
+            console.log(`匹配到的 comb: ${filledFields}`);
+            console.log(`最终计算结果: ${totalSum}`);
+            console.log(`(k/s)^2 累加结果: ${k_s_squared_sum}`);
+            console.log(`最终公式计算结果: ${finalResult}`);
+        
+            return { totalSum, k_s_squared_sum, finalResult };
+        }
+
+        
+		// fetch('./output.json')
+		//     .then(response => response.json())  // 解析 JSON
+		//     .then(data => {
+		//         // 现在可以使用 data 变量
+		//         console.log(data); // 输出数据到控制台
+		//         // 在这里进行后续的操作，例如渲染数据或计算
+				
+		//     })
+		//     .catch(error => console.error('读取 JSON 时出错:', error));
+		
+		// 示例数据集
+		// const data = data
+   //      const data = [
+   //          { comb: "AB", bm: "A", k: 20, q: 10, s: 40, ba2: 60 },
+   //          { comb: "AB", bm: "B", k: 10, q: 9, s: 6, ba2: 60 },
+			// { comb: "AF", bm: "A", k: 0.02669720422656701, q: 4.127303028722319, s: 1.532030345465077, ba2: -550.8988307439904 },
+			// { comb: "AF", bm: "F", k: -0.4851130534460363, q: 237.4273783791518, s: 67.63938770407113, ba2: -550.8988307439904 },
+   //          { comb: "ABCDEFGHIJKL", bm: "A", k: 10, q: 10, s: 40, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "B", k: 35, q: 12, s: 42, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "C", k: 24, q: 14, s: 44, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "D", k: 26, q: 16, s: 46, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "E", k: 28, q: 18, s: 48, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "F", k: 30, q: 20, s: 50, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "G", k: 32, q: 22, s: 52, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "H", k: 34, q: 24, s: 54, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "I", k: 36, q: 26, s: 56, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "J", k: 38, q: 28, s: 58, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "K", k: 40, q: 30, s: 60, ba2: 60 },
+   //          { comb: "ABCDEFGHIJKL", bm: "L", k: 42, q: 32, s: 62, ba2: 60 },
+			
+			
+   //      ];
+    </script>
+
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background: #f8f9fa;
+            --success-color: #28a745;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background) 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+                display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				gap: 40px;
+				padding: 20px;
+				max-width: 1200px;
+				margin: 40px auto; /* 居中对齐 */
+				background-color: #fff; /* 可选 */
+				box-shadow: 0 0 15px rgba(0,0,0,0.05); /* 可选 */
+				border-radius: 10px; /* 可选 */
+        }
+
+        /* 添加图片 */
+        .image-container {
+            text-align: center;
+            /* margin-bottom: 2rem; */
+        }
+
+        /* .image-container img {
+            width: 100%;
+            max-width: 1200px;
+            height: auto;
+            max-height: 300px;
+        } */
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.8rem;
+            position: relative;
+            font-weight: 600;
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--secondary-color);
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        /* .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        } */
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        label span {
+            font-size: 0.85rem;
+            color: #666;
+            margin-left: 0.5rem;
+            font-weight: 400;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+            outline: none;
+            background: white;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: block;
+            margin: 25px auto;
+            font-weight: 500;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: #e3f2fd;
+            border-radius: 10px;
+            margin-top: 2rem;
+            color: var(--primary-color);
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+		
+		.left-panel {
+			flex: 1;
+			max-width: 50%;
+		}
+	
+		.right-panel {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: flex-start;
+		}
+		
+		.image-container img {
+			width: 75%;
+			height: auto;
+			border-radius: 8px;
+			box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			margin-top: 20px;
+		}
+	
+		h1 {
+			margin-top: 20px;
+		}
+	
+		.form-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 15px;
+		}
+	
+		.form-group {
+			display: flex;
+			flex-direction: column;
+		}
+	
+		/* button {
+			margin-top: 20px;
+			padding: 10px 20px;
+			font-size: 16px;
+		} */
+	
+		.success-message {
+			margin-top: 20px;
+			background: #e6ffe6;
+			padding: 15px;
+			border-radius: 8px;
+		}
+	
+		/* 云朵形状温馨提示 */
+		.cloud-box {
+			position: relative;
+			background: #f0f8ff;
+			width: 85%;
+			color: #333;
+			padding: 20px 30px;
+			border-radius: 30px;
+			font-size: 16px;
+			text-align: center;
+			margin-top: 40px;
+			box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.1);
+		}
+    </style>
+</head>
+<body>
+	<h1>生物学年龄动态评估</h1>
+    <div class="container">
+		<div class="left-panel">
+		        <form id="dataForm" onsubmit="return handleSubmit(event)">
+		            <div class="form-grid">
+		                <div class="form-group">
+		                    <label>尿素 <span>(mmol/L)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>高敏C反应蛋白 <span>(μmol/L)</span></label>
+		                    <input type="number" step="any"> 
+		                </div>
+		                <div class="form-group">
+		                    <label>肌酐 <span></span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>铁蛋白 <span>(ng/mL)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>红细胞计数 <span>(10^12 cells/L)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>血小板计数 <span>(10^9 cells/L)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>白蛋白 <span>(mmol/L)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>甘油三酯 <span>(g/L)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>总胆固醇 <span>(mmol/L)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>转铁蛋白 <span>(mg/dL)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>糖化血红蛋白 <span>(%)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>收缩压 <span>(mmHg)</span></label>
+		                    <input type="number" step="any">
+		                </div>
+		                <div class="form-group">
+		                    <label>实际年龄 <span>（岁）</span></label>
+		                    <input type="number" step="any" required>
+		                </div>
+		            </div>
+		            <button type="submit">开始计算</button>
+		        </form>
+		        <div class="success-message" id="successMessage">
+		            <h3>✓ 计算成功！</h3>
+		            <p style="font-size: 24px;">生物年龄BA: <span id="bioAge"></span> 岁</p>
+		            <p style="font-size: 24px;">衰老加速: <span id="agingRate"></span></p>
+		        </div>
+		    </div>
+		
+		    <!-- 右侧图片和温馨提示 -->
+		    <div class="right-panel">
+		        <div class="image-container">
+		            <img src="./3.jpg" alt="生物学年龄计算器图片">
+		        </div>
+		        <div class="cloud-box">
+		            温馨提醒：生活因素（如吸烟、喝酒等）对生物学年龄计算会产生一定的影响！
+		        </div>
+		    </div>
+        <!-- 图片部分
+        <div class="image-container">
+            <img src="img/1.png" alt="生物学年龄计算器图片">
+        </div>
+
+        <h1>生物学年龄动态评估</h1>
+        <form id="dataForm" onsubmit="return handleSubmit(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>尿素 <span>(mmol/L)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>高敏C反应蛋白 <span>(μmol/L)</span></label>
+                    <input type="number">
+                </div>
+				<div class="form-group">
+				    <label>肌酐 <span></span></label>
+				    <input type="number">
+				</div>
+                <div class="form-group">
+                    <label>铁蛋白 <span>(ng/mL)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>红细胞计数 <span>(10^12 cells/L)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>血小板计数 <span>(10^9 cells/L)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>白蛋白 <span>(mmol/L)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>甘油三酯 <span>(g/L)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>总胆固醇 <span>(mmol/L)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>转铁蛋白 <span>(mg/dL)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>糖化血红蛋白 <span>(%)</span></label>
+                    <input type="number">
+                </div>
+                <div class="form-group">
+                    <label>收缩压 <span>(mmHg)</span></label>
+                    <input type="number">
+                </div>
+                
+		 <div class="form-group">
+        	<label>实际年龄 <span>（岁）</span></label>
+       	 	<input type="number" required>
+  		  </div>
+            </div>
+            <button type="submit">开始计算</button>
+        </form>
+        <div class="success-message" id="successMessage">
+            <h3>✓ 计算成功！</h3>
+            <p style="font-size: 24px;">生物年龄BA: <span id="bioAge"></span> 岁</p>
+            <p style="font-size: 24px;">衰老加速: <span id="agingRate"></span></p>
+        </div> -->
+    </div>
+</body>
+</html>
