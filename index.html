@@ -180,18 +180,48 @@
             min-height: 100vh;
             padding: 2rem;
         }
+		
+		.intro-panel {
+		    flex: 1;
+		    max-width: 25%;
+		    background-color: #ffffff;
+		    padding: 20px;
+		  /*  border-radius: 10px; */
+		    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+		    font-size: 16px;
+		    color: #333;
+		    line-height: 1.6;
+		}
+		
+		.intro-panel h2 {
+		    font-size: 1.6rem;
+		    margin-bottom: 1rem;
+		    color: var(--primary-color);
+		    border-left: 5px solid var(--secondary-color);
+		    padding-left: 10px;
+		}
+		.left-panel h2 {
+		    font-size: 1.6rem;
+		    margin-bottom: 1rem;
+		    color: var(--primary-color);
+		    border-left: 5px solid var(--secondary-color);
+		    padding-left: 10px;
+		}
+
 
         .container {
                 display: flex;
 				flex-direction: row;
 				justify-content: space-between;
-				gap: 40px;
+				gap: 0px;
 				padding: 20px;
-				max-width: 1200px;
+				max-width: 1600px;
 				margin: 40px auto; /* 居中对齐 */
 				background-color: #fff; /* 可选 */
 				box-shadow: 0 0 15px rgba(0,0,0,0.05); /* 可选 */
 				border-radius: 10px; /* 可选 */
+				margin-bottom: 0; /* 取消底部外边距 */
+				padding-bottom: 20px; 
         }
 
         /* 添加图片 */
@@ -342,7 +372,7 @@
 		}
 		
 		.image-container img {
-			width: 75%;
+			width: 100%;
 			height: auto;
 			border-radius: 8px;
 			box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -385,17 +415,76 @@
 			color: #333;
 			padding: 20px 30px;
 			border-radius: 30px;
-			font-size: 16px;
+			font-size: 24px;
 			text-align: center;
 			margin-top: 40px;
 			box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.1);
 		}
+		.page-title {
+		    background-color: #001f4d;
+		    color: white;
+		    text-align: left;
+		    padding: 10px 20px;
+		    border-radius: 0;
+			max-width: 1600px;
+			margin: 40px auto; /* 居中对齐 */
+		    margin-bottom: 20px; /* 和下面内容留点距离 */
+		}
+		.reference-box {
+		    max-width: 1200px;      /* 和container宽度保持一致 */
+		    margin: 20px auto;      /* 上下间距，左右居中 */
+		    padding: 15px 20px;
+		    border: 1px solid #000; /* 黑色边框 */
+		    box-sizing: border-box;
+		    font-size: 1rem;
+			max-width: 1600px;
+			margin: 40px auto;
+			margin-top: 0; /* 取消顶部外边距 */
+		    background-color: #f9f9f9; /* 淡灰背景，可按需改 */
+		}
+
+
+		
+		.left-panel,
+		.intro-panel,
+		.right-panel {
+		    border: 1px solid black;      /* 黑色边框 */
+		    padding: 20px;                /* 加些内边距使内容不贴边 */
+		/*    border-radius: 8px;  */         /* 可选：圆角 */
+		}
+
     </style>
 </head>
 <body>
-	<h1>生物学年龄动态评估</h1>
+	<h1 class="page-title">生物学年龄动态评估</h1>
+
     <div class="container">
+		<div class="intro-panel">
+		    <h2>平台介绍</h2>
+		    <p>本平台基于Klemera和Doubal提出的KDM-BA理论框架，并采用刘足云教授团队基于12种临床常规标志物开发的中国人群KDM-BA模型。该12项临床常规标志物模型包含12项临床常规标志物，涵盖五大生理系统： </p>
+		    <p>1）免疫功能（超敏C反应蛋白、红细胞计数、血小板计数）</p>
+			<p>1）免疫功能（超敏C反应蛋白、红细胞计数、血小板计数）</p>
+			<p>2）心脏代谢（总胆固醇、甘油三酯、糖化血红蛋白、收缩压）</p>
+			<p>3） 肝功能（白蛋白）</p>
+			<p>4） 肾功能（尿素、肌酐）</p> 
+			<p>5）铁代谢（铁蛋白、转铁蛋白）</p>
+			<p>本研究团队通过对这12项标志物进行系统性数学组合分析，基于每种组合构建KDM-BA，从中筛选性能优良的组合，以确保在部分标志物缺失的条件下，仍能有效开展衰老量化研究。</p>
+			<p></p>
+			<br>
+			<br>
+			<br>
+			<br>
+			<p></p>
+			<div class="intro-image">
+			        <img src="./1.png" alt="平台介绍相关图片" style="max-width: 100%; height: auto;">
+			</div>
+		</div>
+		
+		 
+		
+
 		<div class="left-panel">
+			<h2>数据输入</h2>
 		        <form id="dataForm" onsubmit="return handleSubmit(event)">
 		            <div class="form-grid">
 		                <div class="form-group">
@@ -462,16 +551,17 @@
 		
 		    <!-- 右侧图片和温馨提示 -->
 		    <div class="right-panel">
-		        <div class="image-container">
-		            <img src="./3.jpg" alt="生物学年龄计算器图片">
-		        </div>
+		        
 		        <div class="cloud-box">
 		            温馨提醒：生活因素（如吸烟、喝酒等）对生物学年龄计算会产生一定的影响！
 		        </div>
+				<div class="image-container">
+				   <img src="./3.jpg" alt="生物学年龄计算器图片">
+				</div>
 		    </div>
-        <!-- 图片部分
+        <!-- 图片部分jpg
         <div class="image-container">
-            <img src="img/1.png" alt="生物学年龄计算器图片">
+            <img src="img/3.jpg" alt="生物学年龄计算器图片">
         </div>
 
         <h1>生物学年龄动态评估</h1>
@@ -539,5 +629,30 @@
             <p style="font-size: 24px;">衰老加速: <span id="agingRate"></span></p>
         </div> -->
     </div>
+	<div class="reference-box">
+		<h2>参考文献</h2>
+	    <p>[1] 王秋懿, 靳建亮. 衰老对免疫系统的影响及其干预机制的研究进展[J]. 医学研究与战创伤救治, 2023, 36(03): 311 https://link.cnki.net/doi/10.16571/j.cnki.2097-2768.2023.03.017<br>
+	    WANG QY, JIN JL. Research progress on the impact of aging on immune system and its intervention mechanism［J］．Journal of Medical Research ＆ Combat Trauma Care, 2023, 36(3): 311</p>
+	    <p>[2] 王晨铭, 郭欢. 生物学年龄及其影响因素研究进展[J]. 中国预防医学杂志, 2021, 22(06): 465 https://link.cnki.net/doi/10.16506/j.1009-6639.2021.06.012</p>
+		<p>[3] 段晓冉, 葛亚豪, 魏雨婕,等. 衰老的表现、原因及预防[J]. 郑州大学学报(医学版), 2024, 59(06): 741 https://link.cnki.net/doi/10.13705/j.issn.1671-6825.2024.10.070</p>
+		<p>[4] KLEMERA P, DOUBAL S. A new approach to the concept and computation of biological age[J]. Mech Ageing Dev, 2006, 127(3): 240 https://doi.org/10.1016/j.mad.2005.10.004</p>
+		<p>[5] ZHANG Z,SHENG N,QU YL, et al. Dietary diversity modified the assoeiation of per-and polyfluoroalkyl substances with accelerated biological aging: evidence from the China national human biomonitoring study[j]. Environ Sci Technol,2025.59(16):7877 
+https://doi.org/10.1021/acs.est.4c13048</p>
+		<p>[6] GA0 X,CENG T,JANG MJ, et al. Accelerated biological aging and risk of depression and anxiety : evidence from 424,299 UK Biobank participants[j]. Nat Commun ,2023.14(1):2277    
+https://doi.org/10.1038/s41467-023-38013-7</p>
+		<p>[7] 吴维超, 郭燕, 赵祥凯, 等. 职业酸雾暴露与作业工人生物衰老加速的关联性分析[J]. 吉林大学学报(医学版), 2024, 50(06): 1741 
+https://link.cnki.net/doi/10.13481/j.1671-587X.20240629<br>
+		WU WC, GUO Y, ZHAO XK, et al. Correlation analysis on occupational acid fog exposure and accelerated biological aging in workers [J]. Journal of Jilin University （Medicine Edition）, 2024, 50(06): 1741</p>
+		<p>[8] LU ZY. Development and validation of 2 composite aging measures using routine clinical biomarkers in the Chinese population :analyses from 2 prospective cohort studies[j]. J Gerontol A Biol Sci Med Sci,202l,76(9):1627 https://doi.org/10.1093/gerona/glaa238</p>
+		<p>[9]高晨阳,李梦涵,谷志广,等.生物学年龄研究进展[J]郑州大学学报(医学版),2025.60(4):445<br>
+GAO CY,LI MH,GU ZG, et al, Progress in biological age research[j]. Journal of Zhengzhou University( Medical, Sciences),2025,60(4):445</p>
+		<p>[10] BELSKY DW, CASPI A, HOUTS R, et al. Quantification of biological aging in young adults[J]. Proc Natl Acad Sci U S A, 2015, 112(30): E4104 https://doi.org/10.1073/pnas.1506264112</p>
+		<p>[11]	PARTRIDGE L, FUENTEALBA M, KENNEDY BK. The quest to slow ageing through drug discovery[J]. Nat Rev Drug Discov, 2020, 19(8): 513 https://doi.org/10.1038/s41573-020-0067-7</p>
+		<p>[12]	KENNEDY BK, BERGER SL, BRUNET A, et al. Geroscience: linking aging to chronic disease[J]. 
+Cell, 2014, 159(4): 709 https://doi.org/10.1016/j.cell.2014.10.039</p>
+		<p>[13]	CHEN L, SHEN Q, LIU Y, et al. Homeostasis and metabolism of iron and other metal ions in neurodegenerative diseases[J]. Signal Transduct Target Ther, 2025, 10(1): 31
+ https://doi.org/10.1038/s41392-024-02071-0</p>
+		
+	</div>
 </body>
 </html>
