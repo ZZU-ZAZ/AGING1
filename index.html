@@ -157,6 +157,25 @@
 			
 			
    //      ];
+   document.addEventListener("DOMContentLoaded", function () {
+     const inputs = document.querySelectorAll(".form-input");
+   
+     inputs.forEach((input, index) => {
+       input.addEventListener("keydown", function (e) {
+         if (e.key === "Enter") {
+           e.preventDefault();
+           // 找下一个输入框
+           const next = inputs[index + 1];
+           if (next) {
+             next.focus();
+           } else {
+             // 如果是最后一个，提交表单
+             document.getElementById("dataForm").requestSubmit();
+           }
+         }
+       });
+     });
+   });
     </script>
 
 
@@ -423,7 +442,7 @@
 		.page-title {
 		    background-color: #001f4d;
 		    color: white;
-		    text-align: left;
+		    text-align: center;
 		    padding: 10px 20px;
 		    border-radius: 0;
 			max-width: 1600px;
@@ -452,11 +471,85 @@
 		    padding: 20px;                /* 加些内边距使内容不贴边 */
 		/*    border-radius: 8px;  */         /* 可选：圆角 */
 		}
+		
+		.left-panel {
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+
+  ol {
+    list-style: decimal inside;
+    padding-left: 0;
+  }
+
+  li {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  label {
+    flex: 1;
+    margin-right: 10px;
+  }
+
+  .form-input {
+    flex: 1;
+    padding: 5px;
+    font-size: 16px;
+  }
+
+  button {
+    display: block;
+    margin: 20px auto 10px;
+    padding: 8px 16px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .left-panel {
+      max-width: 600px;
+      margin: 0 auto;
+      font-family: Arial, sans-serif;
+    }
+  
+    ol {
+      list-style: decimal inside;
+      padding-left: 0;
+    }
+  
+    li {
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    label {
+      flex: 1;
+      margin-right: 10px;
+    }
+  
+    .form-input {
+      flex: 1;
+      padding: 5px;
+      font-size: 16px;
+    }
+  
+    button {
+      display: block;
+      margin: 20px auto 10px;
+      padding: 8px 16px;
+      font-size: 18px;
+      cursor: pointer;
+    }
 
     </style>
 </head>
 <body>
-	<h1 class="page-title">生物学年龄动态评估</h1>
+	<h1 class="page-title">生物学年龄自测</h1>
 
     <div class="container">
 		<div class="intro-panel">
@@ -467,7 +560,7 @@
 			<p>3） 肝功能（白蛋白）</p>
 			<p>4） 肾功能（尿素、肌酐）</p> 
 			<p>5）铁代谢（铁蛋白、转铁蛋白）</p>
-			<p>本研究由王威教授团队主导，通过对这12项标志物进行系统性数学组合分析，基于每种组合构建KDM-BA，从中筛选性能优良的组合，以确保在部分标志物缺失的条件下，仍能有效开展衰老量化研究（具体方法见参考文献[1]）。</p>
+			<p>该项目由郑州大学王威教授和浙江大学刘足云教授合作完成。通过对这12项标志物进行系统性数学组合分析，基于每种组合构建KDM-BA，从中筛选性能优良的组合，以确保在部分标志物缺失的条件下，仍能有效开展衰老量化研究（具体方法见参考文献[1]）。</p>
 			<p></p>
 			<br>
 			<br>
@@ -480,9 +573,72 @@
 		</div>
 		
 		 
+		<div class="left-panel">
+		   <h2>数据输入</h2>
+		   <form id="dataForm" onsubmit="return handleSubmit(event)">
+		     <ol id="formList">
+		       <li>
+		         <label>1、尿素 (mmol/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>2、高敏C反应蛋白 (μmol/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>3、肌酐：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>4、铁蛋白 (ng/mL)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>5、红细胞计数 (10^12 cells/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>6、血小板计数 (10^9 cells/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>7、白蛋白 (mmol/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>8、甘油三酯 (g/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>9、总胆固醇 (mmol/L)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>10、转铁蛋白 (mg/dL)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>11、糖化血红蛋白 (%)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>12、收缩压 (mmHg)：</label>
+		         <input type="number" step="any" class="form-input">
+		       </li>
+		       <li>
+		         <label>13、实际年龄（岁）：</label>
+		         <input type="number" step="any" class="form-input" required>
+		       </li>
+		     </ol>
+		     <button type="submit">开始计算</button>
+		     <div style="text-align: center; font-size: 18px; margin-top: 10px;">
+		       <p>最少输入两项指标</p>
+		     </div>
+		   </form>
+		<!-- </div> -->
 		
 
-		<div class="left-panel">
+		<!-- <div class="left-panel">
 			<h2>数据输入</h2>
 		        <form id="dataForm" onsubmit="return handleSubmit(event)">
 		            <div class="form-grid">
@@ -542,8 +698,9 @@
 		            <button type="submit">开始计算</button>
 					<div style="text-align: center; font-size: 24px;">
 					  <p>最少输入两项指标</p>
-					</div>
-		        </form>
+					</div> -->
+					
+		        <!-- </form> -->
 		        <div class="success-message" id="successMessage">
 		            <h3>✓ 计算成功！</h3>
 		            <p style="font-size: 24px;">生物年龄BA: <span id="bioAge"></span> 岁</p>
@@ -552,23 +709,23 @@
 		    </div>
 		
 		    <!-- 右侧图片和温馨提示 -->
-		    <div class="right-panel">
+		<div class="right-panel">
 		        
-		        <div class="cloud-box">
+		    <div class="cloud-box">
 		            温馨提醒：<br>
 					1.生活因素（如吸烟、喝酒等）对生物学年龄计算会产生一定的影响！<br>
 		            2.生物学年龄因人而异，需结合长期临床观测结果进行解释。<br>
 		            3.本研究仅用于科学研究。<br>
 		            4.如需科研计算相关合作或技术交流咨询，请联系邮箱：llmmhh1013@163.com。<br>
-		        </div>
-				<p></p>
-				<br>
-				<br>
-				<p></p>
-				<div class="image-container">
-				   <img src="./图片1.png" alt="生物学年龄计算器图片">
-				</div>
 		    </div>
+				<p></p>
+				<br>
+				<br>
+				<p></p>
+			<div class="image-container">
+				<img src="./图片1.png" alt="生物学年龄计算器图片">
+			</div>
+		</div>
         <!-- 图片部分jpg
         <div class="image-container">
             <img src="img/3.jpg" alt="生物学年龄计算器图片">
