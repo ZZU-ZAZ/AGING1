@@ -22,7 +22,34 @@
 		    }
 		}
 		
+
 		loadData();
+		
+		// 只保留一个DOMContentLoaded事件，整合所有DOM加载后的操作
+		document.addEventListener("DOMContentLoaded", function () {
+		    // 输入框回车事件（原有完整逻辑）
+		    const inputs = document.querySelectorAll(".form-input");
+		    inputs.forEach((input, index) => {
+		        input.addEventListener("keydown", function (e) {
+		            if (e.key === "Enter") {
+		                e.preventDefault();
+		                const next = inputs[index + 1];
+		                if (next) {
+		                    next.focus();
+		                } else {
+		                    document.getElementById("dataForm").requestSubmit();
+		                }
+		            }
+		        });
+		    });
+		
+		    // 新增：返回按钮事件绑定
+		    document.getElementById("resetBtn").addEventListener("click", function() {
+		        document.getElementById('dataForm').style.display = 'block';
+		        document.getElementById('successMessage').classList.remove('show');
+		    });
+		});
+		
 		
         function handleSubmit(event) {
             event.preventDefault();
@@ -103,6 +130,13 @@
                 let entry = data.find(item => item.comb === filledFields && item.bm === key);
                 if (entry) {
                     let userValue = userInput[key] || 0;
+					f (["B", "D", "H"].includes(key)) {
+					                if (userValue <= 0) {
+					                    alert(`指标 ${key} 的值必须为正数才能进行对数转换！`);
+					                    return null;
+					                }
+					                userValue = Math.log(userValue);  // 以 e 为底的对数
+					            }
                     let calculation = ((userValue - entry.q) * entry.k) / (entry.s * entry.s);
                     let k_s_squared = (entry.k / entry.s) * (entry.k / entry.s); // 计算 (k/s)^2
         
@@ -185,24 +219,55 @@
             --secondary-color: #3498db;
             --background: #f8f9fa;
             --success-color: #28a745;
+			--warning-color: #ffc107;
+			--danger-color: #dc3545;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI','Microsoft YaHei',  sans-serif;
         }
 
         body {
             background: linear-gradient(135deg, var(--background) 0%, #e9ecef 100%);
             min-height: 100vh;
-            padding: 2rem;
-        }
-		
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+			box-sizing: border-box;  /* 确保padding不影响整体宽度 */
+		}	
+		.page-title {
+		    background-color: #001f4d;
+		    color: white;
+		    text-align: center;
+		    padding: 10px 20px;
+		    border-radius: 0;
+			max-width: 1600px;
+			margin: 40px auto; /* 居中对齐 */
+		    margin-bottom: 20px; /* 和下面内容留点距离 */
+		}	
+		.container {
+		        display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: stretch;
+				gap:20px;
+				padding: 20px; /* 这个是容器的内边距，会影响子元素左右对齐 */
+				max-width: 1600px;
+				margin: 0px auto; /* 居中对齐 */
+				background-color: #fff; /* 可选 */
+				box-shadow: 0 0 15px rgba(0,0,0,0.05); /* 可选 */
+				border-radius: 10px; /* 可选 */
+				padding-bottom: 20px; 
+				box-sizing: border-box;  /* 确保padding不增加总宽度 */
+		}		
+		 /* 平台介绍面板 */
 		.intro-panel {
-		    flex: 1;
-		    max-width: 25%;
+		    max-width: 1600px;
+			width: 100%; /* 确保宽度填满 */
+			flex: none; /* 移除flex属性 */
 		    background-color: #ffffff;
 		    padding: 20px;
 		  /*  border-radius: 10px; */
@@ -210,6 +275,8 @@
 		    font-size: 16px;
 		    color: #333;
 		    line-height: 1.6;
+			border: 1px solid black;
+			margin: 0 auto;  /* 居中对齐 */
 		}
 		
 		.intro-panel h2 {
@@ -219,35 +286,192 @@
 		    border-left: 5px solid var(--secondary-color);
 		    padding-left: 10px;
 		}
-		.left-panel h2 {
-		    font-size: 1.6rem;
-		    margin-bottom: 1rem;
-		    color: var(--primary-color);
-		    border-left: 5px solid var(--secondary-color);
-		    padding-left: 10px;
+		.intro-image {
+		    text-align: center; /* 图片水平居中 */
+		    margin: 20px auto; /* 上下留间距，左右自动居中 */
 		}
-
-
-        .container {
-                display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				gap: 0px;
-				padding: 20px;
-				max-width: 1600px;
-				margin: 40px auto; /* 居中对齐 */
-				background-color: #fff; /* 可选 */
-				box-shadow: 0 0 15px rgba(0,0,0,0.05); /* 可选 */
-				border-radius: 10px; /* 可选 */
-				margin-bottom: 0; /* 取消底部外边距 */
-				padding-bottom: 20px; 
+		.intro-panel p {
+		    text-indent: 2em;
+		}
+		.intro-panel p {
+            text-indent: 2em;
+        
+		}
+        .intro-image img {
+            max-width: 100%; /* 图片自适应宽度，不超过容器 */
+            height: auto; /* 保持图片比例 */
+        }
+		 /* 数据输入面板 - 布局变化在此 */
+		.left-panel {
+		          max-width: 1600px;
+		          width: 100%; /* 确保宽度填满 */
+		          flex: none; /* 移除flex属性 */
+		          background-color: #ffffff;
+		          padding: 20px;
+		          box-shadow: 0 0 10px rgba(0,0,0,0.05);
+		          border: 1px solid black;
+				  margin: 0 auto;  /* 居中对齐 */
+		      }
+			  
+			  .left-panel h2 {
+			      font-size: 1.6rem;
+			      margin-bottom: 1rem;
+			      color: var(--primary-color);
+			      border-left: 5px solid var(--secondary-color);
+			      padding-left: 10px;
+			  }
+			/* 右侧面板 */  
+			.right-panel {
+			    display: flex;
+			    flex-direction: column;
+			    align-items: center;
+			    justify-content: flex-start;
+			    background-color: #ffffff;
+			    padding: 20px; /* 内边距与上方框一致 */
+			    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+			    border: 1px solid black; /* 边框与上方框一致 */
+			    max-width: 1600px; /* 最大宽度与上方框一致 */
+			    width: 100%; /* 宽度占比与上方框一致（填满父容器） */
+			    margin: 0 auto 20px; /* 外边距与上方框一致 */
+			    box-sizing: border-box; /* 关键：宽度包含边框和内边距（与上方框计算方式一致） */
+			}
+			/* 添加图片 */
+			.image-container {
+			    text-align: center;
+				margin-top: 20px;
+			    /* margin-bottom: 2rem; */
+			}  
+			  
+			 .image-container img {
+			 	width: 100%;
+			 	height: auto;
+			 	border-radius: 8px;
+			 	box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			 	margin-top: 20px;
+			 }
+			  
+		 /* 修改数据输入部分为三列布局 */  
+		 .input-container {
+		     display: grid;
+		     grid-template-columns: 3fr 2fr 3fr; /* 数据名称 | 输入框 | 参考范围 */
+		     gap: 15px;
+		     align-items: center;
+		     margin-bottom: 15px;
+		     padding: 10px;
+		     border-bottom: 1px dashed #eee;
+		 }
+					 
+		 .input-label {
+					font-weight: 500;
+					color: #444;
+					font-size: 1.05rem;
+					}
+		 .input-field {
+		            padding: 12px;
+		            border: 2px solid #e0e0e0;
+		            border-radius: 8px;
+		            font-size: 16px;
+		            transition: all 0.3s ease;
+		            background: #f8f9fa;
+		            width: 100%;
+		           }
+		        .input-field:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+            outline: none;
+            background: white;
+        }
+        
+        .reference-range {
+            color: #666;
+            font-size: 0.95rem;
+            font-style: italic;
+            padding-left: 10px;
+            border-left: 2px solid #f0f0f0;
+        }
+        
+        button {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: block;
+            margin: 25px auto 0;
+            font-weight: 500;
         }
 
-        /* 添加图片 */
-        .image-container {
-            text-align: center;
-            /* margin-bottom: 2rem; */
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
         }
+        
+        .cloud-box {
+            position: relative;
+            background: #f0f8ff;
+            width: 100%; /* 关键：填满右侧面板（与上方框内容宽度一致） */
+            color: #333;
+            padding: 20px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            text-align: left;
+            margin-top: 20px;
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.1);
+            line-height: 1.8;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .input-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .input-field {
+                width: 100%;
+            }
+            
+            .reference-range {
+                border-left: none;
+                padding-left: 0;
+                font-size: 0.85rem;
+            }
+        }
+			  
+		  }
+		  ol {
+		    list-style: decimal inside;
+		    padding-left: 0;
+		  }
+		
+		  li {
+		    margin-bottom: 12px;
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		  }
+		
+		  label {
+		    flex: 1;
+		    margin-right: 10px;
+		  }
+		
+		  .form-input {
+		    flex: 1;
+		    padding: 5px;
+		    font-size: 16px;
+		  }
+		
+		  button {
+		    display: block;
+		    margin: 20px auto 10px;
+		    padding: 8px 16px;
+		    font-size: 18px;
+		    cursor: pointer;
+		  }
 
         /* .image-container img {
             width: 100%;
@@ -331,14 +555,14 @@
         button {
             background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
             color: white;
-            padding: 1rem 1.5rem;
+            padding: 8px 16px;
             border: none;
             border-radius: 50px;
-            font-size: 1.5rem;
+            font-size: 18px;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             display: block;
-            margin: 25px auto;
+            margin: 20px auto;
             font-weight: 500;
         }
 
@@ -378,24 +602,7 @@
         }
 		
 		.left-panel {
-			flex: 1;
-			max-width: 50%;
-		}
-	
-		.right-panel {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: flex-start;
-		}
-		
-		.image-container img {
 			width: 100%;
-			height: auto;
-			border-radius: 8px;
-			box-shadow: 0 0 10px rgba(0,0,0,0.1);
-			margin-top: 20px;
 		}
 	
 		h1 {
@@ -422,7 +629,7 @@
 		.success-message {
 			margin-top: 20px;
 			background: #e6ffe6;
-			padding: 15px;
+			padding: 30px;
 			border-radius: 8px;
 		}
 	
@@ -434,118 +641,81 @@
 			color: #333;
 			padding: 20px 30px;
 			border-radius: 30px;
-			font-size: 24px;
+			font-size: 18px;
 			text-align: left;
-			margin-top: 40px;
+			margin-top: 20px;
 			box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.1);
-		}
-		.page-title {
-		    background-color: #001f4d;
-		    color: white;
-		    text-align: center;
-		    padding: 10px 20px;
-		    border-radius: 0;
-			max-width: 1600px;
-			margin: 40px auto; /* 居中对齐 */
-		    margin-bottom: 20px; /* 和下面内容留点距离 */
+		    line-height: 1.8;	
 		}
 		.reference-box {
-		    max-width: 1200px;      /* 和container宽度保持一致 */
-		    margin: 20px auto;      /* 上下间距，左右居中 */
-		    padding: 15px 20px;
+		    max-width: 1600px;      /* 和container宽度保持一致 */
+		    margin:  0 auto 40px; /* 与上方容器对齐，底部留间距 */
+		    padding: 20px;
 		    border: 1px solid #000; /* 黑色边框 */
 		    box-sizing: border-box;
 		    font-size: 1rem;
-			max-width: 1600px;
-			margin: 40px auto;
-			margin-top: 0; /* 取消顶部外边距 */
+			width: 100%;  /* 自适应宽度 */
 		    background-color: #f9f9f9; /* 淡灰背景，可按需改 */
+			    /* 外层白色底板（复用body的背景不现实，用容器模拟） */
+			box-shadow: 0 0 15px rgba(0,0,0,0.05);
+			border-radius: 10px;
+			padding: 20px; /* 内容到边框的距离 */
 		}
-
-
-		
+		body > .reference-box {
+		    margin: 0 auto;
+		    padding: 20px; /* 此值即为“黑框到白色底板的距离”（统一20px） */
+		    background-color: #fff;
+		    max-width: 1600px;
+		    box-sizing: border-box;
+		}		
 		.left-panel,
-		.intro-panel,
-		.right-panel {
-		    border: 1px solid black;      /* 黑色边框 */
-		    padding: 20px;                /* 加些内边距使内容不贴边 */
-		/*    border-radius: 8px;  */         /* 可选：圆角 */
-		}
-		
+        .intro-panel,
+        .right-panel {
+            border: 1px solid black; /* 统一边框（影响宽度计算） */
+            padding: 20px; /* 统一内边距（影响宽度计算） */
+            max-width: 1600px; /* 统一最大宽度 */
+            margin: 0 auto 20px; /* 统一外边距（不影响宽度，仅控制间距） */
+            width: 100%; /* 统一宽度占比（填满父容器） */
+            flex: none;
+            box-sizing: border-box; /* 统一盒模型（宽度=内容+内边距+边框） */
+         }
 		.left-panel {
-    max-width: 600px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
-  }
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+         }
 
-  ol {
-    list-style: decimal inside;
-    padding-left: 0;
-  }
+         ol {
+            list-style: decimal inside;
+            padding-left: 0;
+        }
 
-  li {
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+         li {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  label {
-    flex: 1;
-    margin-right: 10px;
-  }
+         label {
+            flex: 1;
+            margin-right: 10px;
+         }
 
-  .form-input {
-    flex: 1;
-    padding: 5px;
-    font-size: 16px;
-  }
+         .form-input {
+            flex: 1;
+            padding: 5px;
+            font-size: 16px;
+         }
 
-  button {
-    display: block;
-    margin: 20px auto 10px;
-    padding: 8px 16px;
-    font-size: 18px;
-    cursor: pointer;
-  }
-  
-  .left-panel {
-      max-width: 600px;
-      margin: 0 auto;
-      font-family: Arial, sans-serif;
-    }
-  
-    ol {
-      list-style: decimal inside;
-      padding-left: 0;
-    }
-  
-    li {
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  
-    label {
-      flex: 1;
-      margin-right: 10px;
-    }
-  
-    .form-input {
-      flex: 1;
-      padding: 5px;
-      font-size: 16px;
-    }
-  
-    button {
-      display: block;
-      margin: 20px auto 10px;
-      padding: 8px 16px;
-      font-size: 18px;
-      cursor: pointer;
-    }
+        button {
+            display: block;
+            margin: 20px auto 10px;
+            padding: 8px 16px;
+            font-size: 18px;
+            cursor: pointer;
+         }
 
+  
     </style>
 </head>
 <body>
@@ -554,14 +724,14 @@
     <div class="container">
 		<div class="intro-panel">
 		    <h2>平台介绍</h2>
-		    <p>本平台基于Klemera和Doubal提出的KDM-BA理论框架，并参考刘足云教授团队基于12种临床常规标志物开发的中国人群KDM-BA模型。该12项临床常规标志物模型包含12项临床常规标志物，涵盖五大生理系统： </p>
+		    <p>    本平台以 Klemera 与 Doubal 提出的 KDM-BA 理论框架为核心基础，并借鉴了刘足云教授团队专为中国人群开发的 KDM-BA 模型 —— 该模型依托 12 种临床常规标志物构建。该12项临床常规标志物模型包含12项临床常规标志物，涵盖五大生理系统： </p>
 		    <p>1）免疫功能（超敏C反应蛋白、红细胞计数、血小板计数）</p>
 			<p>2）心脏代谢（总胆固醇、甘油三酯、糖化血红蛋白、收缩压）</p>
 			<p>3） 肝功能（白蛋白）</p>
 			<p>4） 肾功能（尿素、肌酐）</p> 
 			<p>5）铁代谢（铁蛋白、转铁蛋白）</p>
-			<p>通过对这12项标志物进行系统性数学组合分析，基于每种组合构建KDM-BA，从中筛选性能优良的组合，以确保在部分标志物缺失的条件下，仍能有效开展衰老量化研究。（具体方法见参考文献[1]）。</p>
-			<p>该项目由郑州大学公共卫生学院王威教授和浙江大学公共卫生学院刘足云教授合作完成。</p>
+			<p>    通过对这12项标志物进行系统性数学组合分析，基于每种组合构建KDM-BA，从中筛选性能优良的组合，以确保在部分标志物缺失的条件下，仍能有效开展衰老量化研究。（具体方法见参考文献[1]）。</p>
+			<p><strong>     该项目由郑州大学公共卫生学院王威教授和浙江大学公共卫生学院刘足云教授合作完成。</strong></p>
 			<br>
 			<br>
 			<br>
@@ -577,64 +747,90 @@
 		   <h2>数据输入</h2>
 		   <form id="dataForm" onsubmit="return handleSubmit(event)">
 		     <ol id="formList">
-		       <li>
-		         <label>1、尿素 (mmol/L)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>2、高敏C反应蛋白 (mg/L)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>3、肌酐：(μmol/L)</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>4、铁蛋白 (ng/mL)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>5、红细胞计数 (10^12 cells/L)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>6、血小板计数 (10^9 cells/L)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>7、白蛋白 （g/L）：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>8、甘油三酯 （mmol/L）：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>9、总胆固醇 (mmol/L)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>10、转铁蛋白 (mg/dL)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>11、糖化血红蛋白 (%)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>12、收缩压 (mmHg)：</label>
-		         <input type="number" step="any" class="form-input">
-		       </li>
-		       <li>
-		         <label>13、实际年龄（岁）：</label>
-		         <input type="number" step="any" class="form-input" required>
-		       </li>
-		     </ol>
-		     <button type="submit">开始计算</button>
-		     <div style="text-align: center; font-size: 18px; margin-top: 10px;">
-		       <p>最少输入两项指标</p>
-		     </div>
-		   </form>
+		        <div class="input-container">
+		                           <div class="input-label">1、尿素(mmol/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:   1.7-8.3</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">2、高敏C反应蛋白(mg/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:   &lt; 3.0</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">3、肌酐(μmol/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  男性: 53-116 | 女性: 44-97</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">4、铁蛋白(ng/mL)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  男性: 20-250 | 女性: 10-120</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">5、红细胞计数(10^12 cells/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  男性: 4-5.5 | 女性: 3.5-5</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">6、血小板计数(10^9 cells/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  100-300</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">7、白蛋白(g/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  35-55</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">8、甘油三酯(mmol/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  0.56-1.7</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">9、总胆固醇(mmol/L)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  3-5.2</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">10、转铁蛋白(mg/dL)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  220-400</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">11、糖化血红蛋白(%)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  4.0-6.0</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">12、*收缩压(mmHg)</div>
+		                           <input type="number" step="any" min="0" class="input-field">
+		                           <div class="reference-range">参考范围:  90-139</div>
+		                       </div>
+		                       
+		                       <div class="input-container">
+		                           <div class="input-label">13、实际年龄(岁)</div>
+		                           <input type="number" step="any" min="0" class="input-field" required>
+		                           <div class="reference-range">--</div>
+		                       </div>
+		                       
+		                       <button type="submit">开始计算</button>
+		                       <div style="text-align: center; font-size: 18px; margin-top: 10px;">
+		                           <p>最少输入两项指标</p>
+		                       </div>
+		                   </form>
+		               </div>
 		<!-- </div> -->
 		
 
@@ -705,6 +901,8 @@
 		            <h3>✓ 计算成功！</h3>
 		            <p style="font-size: 24px;">生物年龄BA: <span id="bioAge"></span> 岁</p>
 		            <p style="font-size: 24px;">衰老加速: <span id="agingRate"></span></p>
+		            <!-- 新增返回按钮 -->
+		            <button type="button" id="resetBtn" style="margin-top: 20px;">返回</button>
 		        </div>
 		    </div>
 		
@@ -779,7 +977,7 @@
                     <input type="number">
                 </div>
                 <div class="form-group">
-                    <label>收缩压 <span>(mmHg)</span></label>
+                    <label>*收缩压 <span>(mmHg)</span></label>
                     <input type="number">
                 </div>
                 
@@ -795,26 +993,17 @@
             <p style="font-size: 24px;">生物年龄BA: <span id="bioAge"></span> 岁</p>
             <p style="font-size: 24px;">衰老加速: <span id="agingRate"></span></p>
         </div> -->
-    </div>
-	<div class="reference-box">
-		<h2>参考文献</h2>
+          </div>
+        <div class="reference-box">
+		   <h2>参考文献</h2>
 	    <p>[1] 李梦涵,高晨阳,秦琅,等.基于多种临床常规标志物的中国人群生物学年龄模型的构建[J].郑州大学学报(医学版), 2024, 59(06): 8</p>
 	    <p>[2] 吴维超, 郭燕, 赵祥凯, 等. 职业酸雾暴露与作业工人生物衰老加速的关联性分析[J]. 吉林大学学报(医学版), 2024, 50(06): 1741 https://link.cnki.net/doi/10.13481/j.1671-587X.20240629	</p>
 		<p>[3] 高晨阳,李梦涵,谷志广,等.生物学年龄研究进展[J]郑州大学学报(医学版),2025.60(4):445</p>
 		<p>[4] 段晓冉, 葛亚豪, 魏雨婕,等. 衰老的表现、原因及预防[J]. 郑州大学学报(医学版), 2024, 59(06): 741 https://link.cnki.net/doi/10.13705/j.issn.1671-6825.2024.10.070</p>
-		<p>[5] KLEMERA P, DOUBAL S. A new approach to the concept and computation of biological age[J]. Mech Ageing Dev, 2006, 127(3): 240 https://doi.org/10.1016/j.mad.2005.10.004</p>
-		<p>[6] ZHANG Z,SHENG N,QU YL, et al. Dietary diversity modified the assoeiation of per-and polyfluoroalkyl substances with accelerated biological aging: evidence from the China national human biomonitoring study[j]. Environ Sci Technol,2025.59(16):7877 
-https://doi.org/10.1021/acs.est.4c13048</p>
+		<p>[5] LU ZY. Development and validation of 2 composite aging measures using routine clinical biomarkers in the Chinese population :analyses from 2 prospective cohort studies[j]. J Gerontol A Biol Sci Med Sci,202l,76(9):1627 https://doi.org/10.1093/gerona/glaa238</p>
+		<p>[6] KLEMERA P, DOUBAL S. A new approach to the concept and computation of biological age[J]. Mech Ageing Dev, 2006, 127(3): 240 https://doi.org/10.1016/j.mad.2005.10.004</p>
 		<p>[7] GA0 X,CENG T,JANG MJ, et al. Accelerated biological aging and risk of depression and anxiety : evidence from 424,299 UK Biobank participants[j]. Nat Commun ,2023.14(1):2277    
 https://doi.org/10.1038/s41467-023-38013-7</p>
-		<p>[8] LU ZY. Development and validation of 2 composite aging measures using routine clinical biomarkers in the Chinese population :analyses from 2 prospective cohort studies[j]. J Gerontol A Biol Sci Med Sci,202l,76(9):1627 https://doi.org/10.1093/gerona/glaa238</p>
-		<p>[9]BELSKY DW, CASPI A, HOUTS R, et al. Quantification of biological aging in young adults[J]. Proc Natl Acad Sci U S A, 2015, 112(30): E4104 https://doi.org/10.1073/pnas.1506264112</p>
-		<p>[10] PARTRIDGE L, FUENTEALBA M, KENNEDY BK. The quest to slow ageing through drug discovery[J]. Nat Rev Drug Discov, 2020, 19(8): 513 https://doi.org/10.1038/s41573-020-0067-7</p>
-		<p>[11]	KENNEDY BK, BERGER SL, BRUNET A, et al. Geroscience: linking aging to chronic disease[J]. 
-Cell, 2014, 159(4): 709 https://doi.org/10.1016/j.cell.2014.10.039</p>
-		<p>[12]	CHEN L, SHEN Q, LIU Y, et al. Homeostasis and metabolism of iron and other metal ions in neurodegenerative diseases[J]. Signal Transduct Target Ther, 2025, 10(1): 31
- https://doi.org/10.1038/s41392-024-02071-0</p>
-		
-	</div>
+	    </div>
 </body>
 </html>
