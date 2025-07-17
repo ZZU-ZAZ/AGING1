@@ -109,36 +109,37 @@
         function calculateSum(userInput, userAge) {
             // 获取所有用户输入的字段（非空值）
             let filledFields = Object.keys(userInput)
-                .filter(key => userInput[key] !== 0) // 过滤掉值为 0 的字段
+                .filter(key => userInput[key] !== 0)
                 .sort()
                 .join("");
         
-            // 查找完全匹配的 comb 记录
+            // 查找匹配的组合
             let record = data.find(item => item.comb === filledFields);
-        
             if (!record) {
                 console.log("未找到匹配的 comb 记录");
                 return null;
             }
         
             let totalSum = 0;
-            let k_s_squared_sum = 0;  // 用于计算 (k/s)^2 的累加
-            let ba2 = record.ba2;  // 取 ba2 值
+            let k_s_squared_sum = 0;
+            let ba2 = record.ba2;
         
-            // 遍历所有指标
             for (let key of Object.keys(userInput)) {
                 let entry = data.find(item => item.comb === filledFields && item.bm === key);
                 if (entry) {
-                    let userValue = userInput[key] || 0;
-					f (["B", "D", "H"].includes(key)) {
-					                if (userValue <= 0) {
-					                    alert(`指标 ${key} 的值必须为正数才能进行对数转换！`);
-					                    return null;
-					                }
-					                userValue = Math.log(userValue);  // 以 e 为底的对数
-					            }
+                    let userValue = userInput[key];
+        
+                    // 👇 对 B、D、H 做 log 变换
+                    if (["B", "D", "H"].includes(key)) {
+                        if (userValue <= 0) {
+                            alert(`指标 ${key} 的值必须为正数才能进行对数转换！`);
+                            return null;
+                        }
+                        userValue = Math.log(userValue); // 自然对数
+                    }
+        
                     let calculation = ((userValue - entry.q) * entry.k) / (entry.s * entry.s);
-                    let k_s_squared = (entry.k / entry.s) * (entry.k / entry.s); // 计算 (k/s)^2
+                    let k_s_squared = (entry.k / entry.s) ** 2;
         
                     console.log(`指标: ${key}, 用户输入: ${userValue}, 计算值: ${calculation}, (k/s)^2: ${k_s_squared}`);
         
@@ -147,7 +148,6 @@
                 }
             }
         
-            // 计算最终的公式结果
             let finalResult = (totalSum + (userAge / ba2)) / (k_s_squared_sum + (1 / ba2));
         
             console.log(`匹配到的 comb: ${filledFields}`);
